@@ -1,0 +1,5 @@
+compose.override.yml
+__pycache__/
+*.pyc
+*.pyo
+*.pyd

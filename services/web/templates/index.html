@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMOA — Smart Mobility Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,200;12..96,400;12..96,700;12..96,800&family=DM+Sans:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #0a0c10;
+    --paper: #f5f3ee;
+    --lime: #c8f53c;
+    --teal: #1de9c0;
+    --muted: #7a7d85;
+    --card: #fff;
+    --border: rgba(10,12,16,0.08);
+    --radius: 20px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* ── Custom cursor ── */
+  #cursor {
+    position: fixed; top: 0; left: 0;
+    width: 12px; height: 12px;
+    background: var(--lime);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%,-50%);
+    transition: width .2s, height .2s, background .2s;
+    mix-blend-mode: multiply;
+  }
+  #cursor.big { width: 48px; height: 48px; background: var(--teal); }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 48px;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+    background: rgba(245,243,238,0.72);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-weight: 800;
+    font-size: 1.4rem;
+    letter-spacing: -0.04em;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .logo-dot {
+    width: 10px; height: 10px;
+    background: var(--lime); border-radius: 50%;
+    box-shadow: 0 0 0 3px var(--ink);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 3px var(--ink); }
+    50%      { box-shadow: 0 0 0 6px rgba(200,245,60,.3); }
+  }
+  .nav-links {
+    display: flex; gap: 32px; list-style: none;
+    font-size: .88rem; font-weight: 300; letter-spacing: .01em;
+  }
+  .nav-links a { text-decoration: none; color: var(--muted); transition: color .2s; }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-cta {
+    background: var(--ink); color: var(--paper);
+    border: none; border-radius: 100px;
+    padding: 9px 22px; font-size: .85rem; font-family: 'DM Sans', sans-serif;
+    font-weight: 400; cursor: none; transition: background .2s, transform .15s;
+  }
+  .nav-cta:hover { background: #1a1d26; transform: translateY(-1px); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: grid; grid-template-columns: 1fr 1fr;
+    align-items: center;
+    padding: 140px 48px 80px;
+    gap: 64px;
+    position: relative; overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 60% 60% at 80% 20%, rgba(29,233,192,.12) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 20% 80%, rgba(200,245,60,.15) 0%, transparent 70%);
+  }
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(200,245,60,.2);
+    border: 1px solid rgba(200,245,60,.5);
+    border-radius: 100px;
+    padding: 5px 14px 5px 8px;
+    font-size: .78rem; letter-spacing: .06em; text-transform: uppercase;
+    color: #3a5000; font-weight: 400; margin-bottom: 28px;
+  }
+  .hero-tag-dot { width: 6px; height: 6px; background: #6abf00; border-radius: 50%; animation: pulse2 1.5s infinite; }
+  @keyframes pulse2 { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+  h1 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: clamp(2.8rem, 5vw, 4.4rem);
+    font-weight: 800;
+    line-height: 1.04;
+    letter-spacing: -0.04em;
+    margin-bottom: 24px;
+  }
+  h1 em { font-style: normal; color: var(--muted); }
+  h1 .accent {
+    display: inline-block;
+    background: var(--lime);
+    color: var(--ink);
+    border-radius: 8px;
+    padding: 0 10px;
+    transform: rotate(-1.5deg);
+  }
+
+  .hero-sub {
+    font-size: 1.08rem; line-height: 1.7;
+    color: var(--muted); max-width: 440px; margin-bottom: 44px;
+    font-weight: 300;
+  }
+
+  .cta-group { display: flex; flex-wrap: wrap; gap: 12px; }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    border-radius: 100px; padding: 13px 26px;
+    font-family: 'DM Sans', sans-serif; font-size: .9rem;
+    border: none; cursor: none; text-decoration: none;
+    transition: transform .15s, box-shadow .15s;
+    font-weight: 400;
+  }
+  .btn:hover { transform: translateY(-2px); }
+  .btn-primary {
+    background: var(--ink); color: var(--paper);
+    box-shadow: 0 4px 20px rgba(10,12,16,.25);
+  }
+  .btn-primary:hover { box-shadow: 0 8px 32px rgba(10,12,16,.35); }
+  .btn-outline {
+    background: transparent; color: var(--ink);
+    border: 1.5px solid rgba(10,12,16,.2);
+  }
+  .btn-outline:hover { border-color: var(--ink); background: rgba(10,12,16,.03); }
+  .btn-teal {
+    background: var(--teal); color: var(--ink);
+    box-shadow: 0 4px 20px rgba(29,233,192,.3);
+  }
+  .btn-teal:hover { box-shadow: 0 8px 32px rgba(29,233,192,.45); }
+
+  .btn-icon { font-size: 1.1rem; }
+
+  /* ── CHAT PREVIEW ── */
+  .chat-card {
+    background: var(--card);
+    border-radius: 28px;
+    padding: 28px;
+    box-shadow: 0 24px 80px rgba(10,12,16,.1), 0 0 0 1px var(--border);
+    position: relative;
+    animation: floatCard 6s ease-in-out infinite;
+  }
+  @keyframes floatCard {
+    0%,100% { transform: translateY(0) rotate(0.5deg); }
+    50%      { transform: translateY(-12px) rotate(-0.5deg); }
+  }
+
+  .chat-header {
+    display: flex; align-items: center; gap: 12px;
+    border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 20px;
+  }
+  .chat-avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--lime), var(--teal));
+    display: flex; align-items: center; justify-content: center;
+    font-size: .8rem; font-family: 'Bricolage Grotesque',sans-serif; font-weight: 800;
+    color: var(--ink);
+  }
+  .chat-name { font-family:'Bricolage Grotesque',sans-serif; font-weight:700; font-size:.95rem; }
+  .chat-status { font-size:.75rem; color:#3abf80; display:flex; align-items:center; gap:4px; }
+  .chat-status::before { content:''; display:block; width:6px; height:6px; background:#3abf80; border-radius:50%; }
+
+  .messages { display: flex; flex-direction: column; gap: 12px; }
+
+  .msg {
+    max-width: 82%; padding: 12px 16px;
+    border-radius: 18px; font-size: .88rem; line-height: 1.55;
+    animation: msgIn .4s ease both;
+  }
+  .msg.smoa {
+    background: #f0faf7;
+    border-bottom-left-radius: 4px;
+    color: #1a2a25;
+  }
+  .msg.user {
+    background: var(--ink); color: var(--paper);
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+  }
+  .msg.smoa:nth-child(1) { animation-delay: .1s; }
+  .msg.smoa:nth-child(3) { animation-delay: .3s; }
+  .msg.user:nth-child(2) { animation-delay: .2s; }
+  .msg.user:nth-child(4) { animation-delay: .4s; }
+  .msg.smoa:nth-child(5) { animation-delay: .5s; }
+  @keyframes msgIn {
+    from { opacity:0; transform: translateY(8px); }
+    to   { opacity:1; transform: translateY(0); }
+  }
+
+  .typing {
+    display: flex; gap: 4px; padding: 14px 16px;
+    background: #f0faf7; border-radius: 18px; border-bottom-left-radius: 4px;
+    width: fit-content;
+  }
+  .typing span {
+    width: 7px; height: 7px; background: #9ecfc0; border-radius: 50%;
+    animation: bounce .9s infinite ease-in-out;
+  }
+  .typing span:nth-child(2) { animation-delay: .15s; }
+  .typing span:nth-child(3) { animation-delay: .3s; }
+  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+
+  .route-pill {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--lime); border-radius: 100px;
+    padding: 6px 14px; width: fit-content; margin-top: 8px;
+    font-size: .78rem; font-weight: 400; color: #2a3800;
+  }
+
+  /* ── STATS STRIP ── */
+  .stats {
+    display: flex; justify-content: center; gap: 0;
+    background: var(--ink); color: var(--paper);
+    padding: 28px 48px; overflow: hidden;
+  }
+  .stat {
+    flex: 1; text-align: center; padding: 8px 24px;
+    border-right: 1px solid rgba(255,255,255,.1);
+    position: relative;
+  }
+  .stat:last-child { border-right: none; }
+  .stat-num {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 2.2rem; font-weight: 800; letter-spacing: -.04em;
+    color: var(--lime);
+  }
+  .stat-label { font-size: .78rem; color: rgba(255,255,255,.45); letter-spacing: .06em; text-transform: uppercase; margin-top: 3px; }
+
+  /* ── FEATURES ── */
+  .features { padding: 100px 48px; }
+  .section-header { text-align: center; margin-bottom: 64px; }
+  .section-kicker {
+    font-size: .75rem; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--muted); margin-bottom: 14px; display: block;
+  }
+  h2 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: clamp(2rem, 3.5vw, 3rem);
+    font-weight: 800; letter-spacing: -.04em; line-height: 1.1;
+  }
+
+  .feat-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
+    max-width: 1100px; margin: 0 auto;
+  }
+  .feat-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 32px 28px;
+    border: 1px solid var(--border);
+    transition: transform .2s, box-shadow .2s;
+    position: relative; overflow: hidden;
+  }
+  .feat-card:hover { transform: translateY(-4px); box-shadow: 0 16px 48px rgba(10,12,16,.08); }
+  .feat-card.highlight {
+    background: var(--ink); color: var(--paper); border-color: transparent;
+    grid-row: span 2;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    min-height: 300px;
+  }
+  .feat-card.highlight .feat-icon { color: var(--lime); }
+  .feat-card.highlight p { color: rgba(255,255,255,.6); }
+
+  .feat-icon { font-size: 1.8rem; margin-bottom: 18px; display: block; }
+  .feat-card h3 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 1.15rem; font-weight: 700; margin-bottom: 10px; letter-spacing: -.02em;
+  }
+  .feat-card p { font-size: .88rem; line-height: 1.65; color: var(--muted); font-weight: 300; }
+
+  .feat-bg-circle {
+    position: absolute; width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(29,233,192,.15), transparent 70%);
+    border-radius: 50%; top: -40px; right: -40px;
+    pointer-events: none;
+  }
+
+  /* ── HOW IT WORKS ── */
+  .how { padding: 80px 48px 100px; background: var(--ink); color: var(--paper); }
+  .how .section-kicker { color: rgba(255,255,255,.35); }
+  .how h2 { color: var(--paper); }
+  .steps { display: flex; gap: 0; max-width: 900px; margin: 64px auto 0; position: relative; }
+  .steps::before {
+    content: ''; position: absolute;
+    top: 28px; left: 44px; right: 44px; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
+  }
+  .step { flex: 1; text-align: center; padding: 0 20px; }
+  .step-num {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Bricolage Grotesque',sans-serif; font-weight: 800; font-size: 1.1rem;
+    margin: 0 auto 20px; color: var(--lime);
+    transition: background .3s;
+  }
+  .step:hover .step-num { background: rgba(200,245,60,.12); }
+  .step h3 { font-family:'Bricolage Grotesque',sans-serif; font-weight:700; margin-bottom:10px; font-size:1rem; }
+  .step p { font-size:.85rem; line-height:1.65; color:rgba(255,255,255,.4); font-weight:300; }
+
+  /* ── INTEGRATIONS ── */
+  .integrations { padding: 80px 48px; text-align: center; }
+  .int-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-top: 40px; }
+  .int-chip {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 100px; padding: 8px 18px;
+    font-size: .85rem; transition: border-color .2s, box-shadow .2s;
+  }
+  .int-chip:hover { border-color: var(--teal); box-shadow: 0 4px 16px rgba(29,233,192,.15); }
+  .int-chip-icon { font-size: 1.1rem; }
+
+  /* ── CTA SECTION ── */
+  .cta-section {
+    padding: 100px 48px;
+    text-align: center; position: relative; overflow: hidden;
+  }
+  .cta-bg {
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse 70% 80% at 50% 50%, rgba(200,245,60,.12) 0%, transparent 70%);
+  }
+  .cta-section h2 { font-size: clamp(2.2rem, 4vw, 3.5rem); margin-bottom: 16px; }
+  .cta-section p { color: var(--muted); font-size: 1rem; margin-bottom: 44px; font-weight:300; }
+  .cta-group.centered { justify-content: center; }
+
+  /* ── FOOTER ── */
+  footer {
+    padding: 32px 48px;
+    border-top: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: .8rem; color: var(--muted);
+  }
+
+  /* ── SCROLL REVEAL ── */
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  @media (max-width: 900px) {
+    nav { padding: 16px 24px; }
+    .nav-links { display: none; }
+    .hero { grid-template-columns: 1fr; padding: 120px 24px 60px; gap: 48px; }
+    .feat-grid { grid-template-columns: 1fr; }
+    .feat-card.highlight { grid-row: span 1; min-height: auto; }
+    .steps { flex-direction: column; gap: 32px; }
+    .steps::before { display: none; }
+    .stats { flex-wrap: wrap; }
+    footer { flex-direction: column; gap: 12px; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo"><span class="logo-dot"></span>SMOA</div>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#integrations">Integrations</a></li>
+  </ul>
+  <button class="nav-cta">Get early access</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-left">
+    <div class="hero-tag"><span class="hero-tag-dot"></span>AI-powered mobility</div>
+    <h1>
+      Your city.<br>
+      <span class="accent">Smarter</span><br>
+      <em>every ride.</em>
+    </h1>
+    <p class="hero-sub">
+      SMOA is a conversational mobility assistant that plans routes, books rides,
+      and navigates urban complexity — just by chatting.
+    </p>
+    <div class="cta-group">
+      <a href="#" class="btn btn-teal" onclick="openMessenger(event)"><span class="btn-icon">💬</span> Connect your messenger</a>
+      <a href="#" class="btn btn-primary"><span class="btn-icon">⬇︎</span> Download native app</a>
+      <a href="#" class="btn btn-outline"><span class="btn-icon">✦</span> Try online</a>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="chat-card">
+      <div class="chat-header">
+        <div class="chat-avatar">SM</div>
+        <div>
+          <div class="chat-name">SMOA</div>
+          <div class="chat-status">Online · Ready to move</div>
+        </div>
+      </div>
+      <div class="messages">
+        <div class="msg smoa">Hey! Where are you heading today? 👋</div>
+        <div class="msg user">I need to get to Mitte by 9am, fastest route.</div>
+        <div class="msg smoa">
+          On it. Here's the quickest option:
+          <div class="route-pill">🚇 U2 → 🚲 6 min ride · 22 min total</div>
+        </div>
+        <div class="msg user">Book the bike for me at Alexanderplatz</div>
+        <div class="msg smoa">Done! Your Nextbike is reserved at exit B. Walk time: 3 min. 🟢</div>
+        <div class="typing"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats">
+  <div class="stat reveal"><div class="stat-num">4.2M</div><div class="stat-label">Trips planned</div></div>
+  <div class="stat reveal"><div class="stat-num">98%</div><div class="stat-label">On-time accuracy</div></div>
+  <div class="stat reveal"><div class="stat-num">60+</div><div class="stat-label">City integrations</div></div>
+  <div class="stat reveal"><div class="stat-num">8 sec</div><div class="stat-label">Avg. response time</div></div>
+</div>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="section-header reveal">
+    <span class="section-kicker">What SMOA does</span>
+    <h2>Everything mobility.<br>One conversation.</h2>
+  </div>
+  <div class="feat-grid">
+    <div class="feat-card highlight reveal">
+      <div class="feat-bg-circle"></div>
+      <span class="feat-icon">🧠</span>
+      <h3>Conversational intelligence</h3>
+      <p>SMOA understands natural language, context, and preferences. No forms, no menus — just talk.</p>
+    </div>
+    <div class="feat-card reveal">
+      <span class="feat-icon">🗺️</span>
+      <h3>Multi-modal routing</h3>
+      <p>Combines trains, buses, bikes, scooters, and rideshare into one seamless journey.</p>
+    </div>
+    <div class="feat-card reveal">
+      <span class="feat-icon">⚡</span>
+      <h3>Real-time disruptions</h3>
+      <p>SMOA detects delays and reroutes you automatically before you even notice.</p>
+    </div>
+    <div class="feat-card reveal">
+      <span class="feat-icon">📱</span>
+      <h3>Works in your messenger</h3>
+      <p>WhatsApp, Telegram, Signal — SMOA lives where you already chat.</p>
+    </div>
+    <div class="feat-card reveal">
+      <span class="feat-icon">💳</span>
+      <h3>Unified payments</h3>
+      <p>Book and pay across providers with one tap. No separate apps needed.</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="section-header reveal">
+    <span class="section-kicker">Getting started</span>
+    <h2>Move in three steps.</h2>
+  </div>
+  <div class="steps">
+    <div class="step reveal">
+      <div class="step-num">01</div>
+      <h3>Connect</h3>
+      <p>Link your messenger or download the native app. Set up in under 60 seconds.</p>
+    </div>
+    <div class="step reveal">
+      <div class="step-num">02</div>
+      <h3>Ask</h3>
+      <p>Tell SMOA where you want to go. Plain language, any time, any city.</p>
+    </div>
+    <div class="step reveal">
+      <div class="step-num">03</div>
+      <h3>Move</h3>
+      <p>Confirm the route. SMOA books, pays, and guides you door to door.</p>
+    </div>
+  </div>
+</section>
+
+<!-- INTEGRATIONS -->
+<section class="integrations" id="integrations">
+  <div class="section-header reveal">
+    <span class="section-kicker">Integrations</span>
+    <h2>Works with everything<br>you already use.</h2>
+  </div>
+  <div class="int-chips reveal">
+    <div class="int-chip"><span class="int-chip-icon">💬</span> WhatsApp</div>
+    <div class="int-chip"><span class="int-chip-icon">✈️</span> Telegram</div>
+    <div class="int-chip"><span class="int-chip-icon">🔒</span> Signal</div>
+    <div class="int-chip"><span class="int-chip-icon">🚇</span> BVG / ÖPNV</div>
+    <div class="int-chip"><span class="int-chip-icon">🚲</span> Nextbike</div>
+    <div class="int-chip"><span class="int-chip-icon">🛴</span> Tier</div>
+    <div class="int-chip"><span class="int-chip-icon">🚕</span> Uber</div>
+    <div class="int-chip"><span class="int-chip-icon">🗺️</span> Google Maps</div>
+    <div class="int-chip"><span class="int-chip-icon">🍏</span> Apple Maps</div>
+    <div class="int-chip"><span class="int-chip-icon">💳</span> Apple Pay</div>
+    <div class="int-chip"><span class="int-chip-icon">🟢</span> Google Pay</div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="cta-bg"></div>
+  <span class="section-kicker reveal">Start today</span>
+  <h2 class="reveal">Ready to rethink how<br>you move?</h2>
+  <p class="reveal">Join 40,000+ commuters already using SMOA daily.</p>
+  <div class="cta-group centered reveal">
+    <a href="#" class="btn btn-teal" onclick="openMessenger(event)"><span class="btn-icon">💬</span> Connect your messenger</a>
+    <a href="#" class="btn btn-primary"><span class="btn-icon">⬇︎</span> Download native app</a>
+    <a href="#" class="btn btn-outline"><span class="btn-icon">✦</span> Try online</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="logo"><span class="logo-dot"></span>SMOA</div>
+  <div>© 2026 SMOA Technologies. All rights reserved.</div>
+  <div style="display:flex;gap:20px;">
+    <a href="#" style="color:var(--muted);text-decoration:none;">Privacy</a>
+    <a href="#" style="color:var(--muted);text-decoration:none;">Terms</a>
+    <a href="#" style="color:var(--muted);text-decoration:none;">Contact</a>
+  </div>
+</footer>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!-- MESSENGER SUBPAGE OVERLAY                      -->
+<!-- ═══════════════════════════════════════════════ -->
+<div id="messenger-overlay" aria-hidden="true">
+  <div id="messenger-panel">
+
+    <button id="messenger-close" onclick="closeMessenger()" aria-label="Close">
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 2l14 14M16 2L2 16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+
+    <!-- Step 0: choose -->
+    <div class="ms-step" id="ms-step-choose">
+      <div class="ms-eyebrow"><span class="ms-dot"></span>Connect messenger</div>
+      <h2 class="ms-title">Where should<br>SMOA reach you?</h2>
+      <p class="ms-sub">Pick the app you already use every day. SMOA will live right there — no new app needed.</p>
+
+      <div class="ms-options">
+        <button class="ms-app-btn" onclick="chooseApp('whatsapp')">
+          <div class="ms-app-icon ms-wa">
+            <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28">
+              <path d="M16 2C8.268 2 2 8.268 2 16c0 2.478.654 4.8 1.796 6.808L2 30l7.394-1.772A13.94 13.94 0 0016 30c7.732 0 14-6.268 14-14S23.732 2 16 2z" fill="#25D366"/>
+              <path d="M22.003 19.274c-.32-.16-1.89-.932-2.183-1.038-.293-.107-.506-.16-.72.16-.213.32-.826 1.038-.013 1.199.293.16 1.997.986 2.557 1.932.16.266-.16.506-.346.666-.573.48-1.306.72-2.07.693-1.76-.053-3.386-.933-4.533-2.24a7.373 7.373 0 01-1.706-4.426c0-1.013.293-1.973.853-2.773.16-.24.373-.373.613-.373h.427c.213 0 .453.08.64.6.213.56.72 1.92.773 2.08.053.16.08.346-.04.506-.107.16-.16.267-.32.427-.16.16-.32.373-.16.666.16.293.72 1.173 1.546 1.893.853.747 1.573 1.013 1.786 1.12.213.107.347.08.48-.08.133-.16.573-.666.72-.893.147-.227.293-.187.48-.107.187.08 1.2.566 1.413.666.213.107.36.16.413.24.053.16.053.666-.267 1.28z" fill="#fff"/>
+            </svg>
+          </div>
+          <div class="ms-app-info">
+            <div class="ms-app-name">WhatsApp</div>
+            <div class="ms-app-desc">Connect via QR or phone number</div>
+          </div>
+          <svg class="ms-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+
+        <button class="ms-app-btn" onclick="chooseApp('signal')">
+          <div class="ms-app-icon ms-sig">
+            <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="28" height="28">
+              <circle cx="16" cy="16" r="14" fill="#3A76F0"/>
+              <path d="M16 8a8 8 0 100 16A8 8 0 0016 8zm0 14a6 6 0 110-12 6 6 0 010 12z" fill="#fff" opacity=".3"/>
+              <circle cx="16" cy="16" r="4" fill="#fff"/>
+              <path d="M10.3 6.8l1 1.7M6.8 10.3l1.7 1M6 16h2M6.8 21.7l1.7-1M10.3 25.2l1-1.7M16 26v-2M21.7 25.2l-1-1.7M25.2 21.7l-1.7-1M26 16h-2M25.2 10.3l-1.7 1M21.7 6.8l-1 1.7M16 6V8" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="ms-app-info">
+            <div class="ms-app-name">Signal</div>
+            <div class="ms-app-desc">Private & encrypted by default</div>
+          </div>
+          <svg class="ms-arrow" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+
+      <p class="ms-privacy">🔒 SMOA never reads your personal chats. Only messages you send to SMOA are processed.</p>
+    </div>
+
+    <!-- Step 1a: WhatsApp -->
+    <div class="ms-step hidden" id="ms-step-whatsapp">
+      <button class="ms-back" onclick="backToChoose()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13 8H3M7 4L3 8l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Back
+      </button>
+      <div class="ms-app-badge ms-wa-badge">
+        <svg viewBox="0 0 32 32" fill="none" width="22" height="22"><path d="M16 2C8.268 2 2 8.268 2 16c0 2.478.654 4.8 1.796 6.808L2 30l7.394-1.772A13.94 13.94 0 0016 30c7.732 0 14-6.268 14-14S23.732 2 16 2z" fill="#25D366"/><path d="M22.003 19.274c-.32-.16-1.89-.932-2.183-1.038-.293-.107-.506-.16-.72.16-.213.32-.826 1.038-.013 1.199.293.16 1.997.986 2.557 1.932.16.266-.16.506-.346.666-.573.48-1.306.72-2.07.693-1.76-.053-3.386-.933-4.533-2.24a7.373 7.373 0 01-1.706-4.426c0-1.013.293-1.973.853-2.773.16-.24.373-.373.613-.373h.427c.213 0 .453.08.64.6.213.56.72 1.92.773 2.08.053.16.08.346-.04.506-.107.16-.16.267-.32.427-.16.16-.32.373-.16.666.16.293.72 1.173 1.546 1.893.853.747 1.573 1.013 1.786 1.12.213.107.347.08.48-.08.133-.16.573-.666.72-.893.147-.227.293-.187.48-.107.187.08 1.2.566 1.413.666.213.107.36.16.413.24.053.16.053.666-.267 1.28z" fill="#fff"/></svg>
+        WhatsApp
+      </div>
+      <h2 class="ms-title">Scan to connect<br>SMOA to WhatsApp</h2>
+      <p class="ms-sub">Open WhatsApp on your phone, go to <strong>Linked Devices</strong>, and scan this code. SMOA will appear as a contact instantly.</p>
+
+      <div class="ms-qr-wrap">
+        <div class="ms-qr-frame">
+          <!-- SVG QR placeholder (decorative) -->
+          <svg viewBox="0 0 160 160" width="160" height="160" xmlns="http://www.w3.org/2000/svg">
+            <rect width="160" height="160" fill="white"/>
+            <!-- Corner squares -->
+            <rect x="10" y="10" width="44" height="44" rx="4" fill="#0a0c10"/><rect x="18" y="18" width="28" height="28" rx="2" fill="white"/><rect x="24" y="24" width="16" height="16" rx="1" fill="#0a0c10"/>
+            <rect x="106" y="10" width="44" height="44" rx="4" fill="#0a0c10"/><rect x="114" y="18" width="28" height="28" rx="2" fill="white"/><rect x="120" y="24" width="16" height="16" rx="1" fill="#0a0c10"/>
+            <rect x="10" y="106" width="44" height="44" rx="4" fill="#0a0c10"/><rect x="18" y="114" width="28" height="28" rx="2" fill="white"/><rect x="24" y="120" width="16" height="16" rx="1" fill="#0a0c10"/>
+            <!-- Data dots -->
+            <rect x="62" y="10" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="74" y="10" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="86" y="10" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="62" y="22" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="86" y="22" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="62" y="34" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="74" y="34" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="10" y="62" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="22" y="62" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="34" y="62" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="10" y="74" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="34" y="74" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="10" y="86" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="22" y="86" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="62" y="62" width="8" height="8" rx="1" fill="#25D366"/>
+            <rect x="74" y="62" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="86" y="62" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="98" y="62" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="62" y="74" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="86" y="74" width="8" height="8" rx="1" fill="#25D366"/>
+            <rect x="98" y="74" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="110" y="74" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="62" y="86" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="74" y="86" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="98" y="86" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="110" y="86" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="122" y="62" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="134" y="62" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="122" y="74" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="134" y="86" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="62" y="98" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="86" y="98" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="110" y="98" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="62" y="110" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="74" y="110" width="8" height="8" rx="1" fill="#25D366"/>
+            <rect x="98" y="110" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="122" y="98" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="134" y="110" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="62" y="122" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="86" y="122" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="110" y="122" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="122" y="122" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="62" y="134" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="74" y="134" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="98" y="134" width="8" height="8" rx="1" fill="#0a0c10"/>
+            <rect x="134" y="134" width="8" height="8" rx="1" fill="#0a0c10"/>
+          </svg>
+          <div class="ms-qr-center-logo">
+            <div class="chat-avatar" style="width:32px;height:32px;font-size:.7rem;">SM</div>
+          </div>
+        </div>
+        <div class="ms-qr-timer">
+          <div class="ms-qr-timer-bar"></div>
+          <span>Code expires in <strong id="wa-timer">2:00</strong></span>
+        </div>
+      </div>
+
+      <div class="ms-divider"><span>or connect with phone number</span></div>
+
+      <div class="ms-phone-row">
+        <input class="ms-input" type="tel" placeholder="+49 170 000 0000" id="wa-phone"/>
+        <button class="btn btn-primary ms-send-btn" onclick="sendWALink()">Send link</button>
+      </div>
+      <p class="ms-hint">We'll send a one-time activation link via WhatsApp.</p>
+    </div>
+
+    <!-- Step 1b: Signal -->
+    <div class="ms-step hidden" id="ms-step-signal">
+      <button class="ms-back" onclick="backToChoose()">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13 8H3M7 4L3 8l4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Back
+      </button>
+      <div class="ms-app-badge ms-sig-badge">
+        <svg viewBox="0 0 32 32" fill="none" width="22" height="22"><circle cx="16" cy="16" r="14" fill="#3A76F0"/><circle cx="16" cy="16" r="4" fill="#fff"/><path d="M10.3 6.8l1 1.7M6.8 10.3l1.7 1M6 16h2M6.8 21.7l1.7-1M10.3 25.2l1-1.7M16 26v-2M21.7 25.2l-1-1.7M25.2 21.7l-1.7-1M26 16h-2M25.2 10.3l-1.7 1M21.7 6.8l-1 1.7M16 6V8" stroke="#fff" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Signal
+      </div>
+      <h2 class="ms-title">Add SMOA<br>on Signal</h2>
+      <p class="ms-sub">Signal's privacy-first design keeps your data encrypted end-to-end. SMOA connects via a verified bot handle — no phone number sharing required with us.</p>
+
+      <div class="ms-signal-steps">
+        <div class="ms-sig-step">
+          <div class="ms-sig-num">1</div>
+          <div class="ms-sig-text">
+            <strong>Open Signal</strong> and tap the compose icon
+          </div>
+        </div>
+        <div class="ms-sig-step">
+          <div class="ms-sig-num">2</div>
+          <div class="ms-sig-text">
+            Search for <span class="ms-handle">@SMOA.mobility</span>
+          </div>
+        </div>
+        <div class="ms-sig-step">
+          <div class="ms-sig-num">3</div>
+          <div class="ms-sig-text">
+            Send the message <span class="ms-code-inline">START</span> to activate
+          </div>
+        </div>
+      </div>
+
+      <button class="btn ms-deep-link" onclick="openSignalDeepLink()">
+        <svg viewBox="0 0 32 32" fill="none" width="18" height="18"><circle cx="16" cy="16" r="14" fill="#3A76F0"/><circle cx="16" cy="16" r="4" fill="#fff"/></svg>
+        Open in Signal app
+      </button>
+
+      <div class="ms-divider"><span>or add via username</span></div>
+
+      <div class="ms-username-box">
+        <span class="ms-username-label">Signal username</span>
+        <div class="ms-username-val">
+          <span>@SMOA.mobility</span>
+          <button class="ms-copy-btn" onclick="copyHandle(this)">
+            <svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="5" y="5" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M3 10V3h7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            Copy
+          </button>
+        </div>
+      </div>
+
+      <p class="ms-privacy" style="margin-top:24px;">🔐 Signal's end-to-end encryption applies to all SMOA messages. We never store chat content.</p>
+    </div>
+
+    <!-- Step 2: Success -->
+    <div class="ms-step hidden" id="ms-step-success">
+      <div class="ms-success-icon">✓</div>
+      <h2 class="ms-title">You're all set!</h2>
+      <p class="ms-sub">SMOA is now connected to your messenger. Say <strong>"Hi"</strong> and start planning your first trip.</p>
+      <button class="btn btn-teal" style="width:100%;justify-content:center;margin-top:28px;" onclick="closeMessenger()">Done</button>
+    </div>
+
+  </div>
+</div>
+
+<style>
+/* ═══════════════════════ MESSENGER OVERLAY STYLES ═══════════════════════ */
+#messenger-overlay {
+  position: fixed; inset: 0;
+  z-index: 500;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(10,12,16,.6);
+  backdrop-filter: blur(8px);
+  opacity: 0; pointer-events: none;
+  transition: opacity .35s ease;
+}
+#messenger-overlay.open {
+  opacity: 1; pointer-events: all;
+}
+#messenger-panel {
+  background: var(--paper);
+  border-radius: 28px;
+  width: min(520px, calc(100vw - 32px));
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 40px;
+  position: relative;
+  transform: translateY(24px) scale(.97);
+  transition: transform .35s cubic-bezier(.34,1.56,.64,1);
+  box-shadow: 0 40px 120px rgba(10,12,16,.25);
+}
+#messenger-overlay.open #messenger-panel {
+  transform: translateY(0) scale(1);
+}
+#messenger-close {
+  position: absolute; top: 20px; right: 20px;
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(10,12,16,.06); border: none; cursor: none;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--muted); transition: background .2s, color .2s;
+}
+#messenger-close:hover { background: rgba(10,12,16,.12); color: var(--ink); }
+
+.ms-step { animation: msStepIn .3s ease both; }
+.ms-step.hidden { display: none !important; }
+@keyframes msStepIn { from { opacity:0; transform:translateX(16px); } to { opacity:1; transform:none; } }
+
+.ms-eyebrow {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: .72rem; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 20px;
+}
+.ms-dot {
+  width: 7px; height: 7px; background: var(--teal); border-radius: 50%;
+  animation: pulse2 1.5s infinite;
+}
+.ms-title {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: clamp(1.6rem, 3vw, 2rem);
+  font-weight: 800; letter-spacing: -.04em; line-height: 1.1;
+  margin-bottom: 14px;
+}
+.ms-sub {
+  font-size: .9rem; line-height: 1.65; color: var(--muted);
+  font-weight: 300; margin-bottom: 32px;
+}
+
+/* App choice buttons */
+.ms-options { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+.ms-app-btn {
+  display: flex; align-items: center; gap: 16px;
+  background: var(--card); border: 1.5px solid var(--border);
+  border-radius: 16px; padding: 18px 20px;
+  cursor: none; text-align: left;
+  transition: border-color .2s, box-shadow .2s, transform .15s;
+}
+.ms-app-btn:hover {
+  border-color: var(--teal);
+  box-shadow: 0 4px 24px rgba(29,233,192,.12);
+  transform: translateY(-2px);
+}
+.ms-app-icon {
+  width: 48px; height: 48px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.ms-wa  { background: #e8faf0; }
+.ms-sig { background: #e8eeff; }
+.ms-app-name { font-family:'Bricolage Grotesque',sans-serif; font-weight:700; font-size:1rem; margin-bottom:3px; }
+.ms-app-desc { font-size:.78rem; color:var(--muted); font-weight:300; }
+.ms-arrow { color: var(--muted); margin-left: auto; flex-shrink:0; }
+
+.ms-privacy {
+  font-size: .75rem; color: var(--muted); line-height: 1.6;
+  background: rgba(10,12,16,.04); border-radius: 10px;
+  padding: 12px 14px; font-weight:300;
+}
+
+/* Back button */
+.ms-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: none; border: none; cursor: none;
+  font-size: .82rem; color: var(--muted); margin-bottom: 24px;
+  transition: color .2s;
+}
+.ms-back:hover { color: var(--ink); }
+
+/* App badge */
+.ms-app-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  border-radius: 100px; padding: 6px 16px 6px 8px;
+  font-size: .82rem; font-weight: 600; margin-bottom: 18px;
+}
+.ms-wa-badge  { background: #e8faf0; color: #1a6a3a; }
+.ms-sig-badge { background: #e8eeff; color: #1a2e8a; }
+
+/* QR code */
+.ms-qr-wrap { display:flex; flex-direction:column; align-items:center; margin: 8px 0 24px; }
+.ms-qr-frame {
+  position: relative;
+  width: 180px; height: 180px;
+  background: white; border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 24px rgba(10,12,16,.1);
+  border: 1px solid var(--border);
+}
+.ms-qr-center-logo {
+  position: absolute; inset:0;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events:none;
+}
+.ms-qr-timer {
+  margin-top: 12px; text-align: center;
+  font-size: .78rem; color: var(--muted); font-weight:300; width:180px;
+}
+.ms-qr-timer-bar {
+  height: 2px; background: var(--border); border-radius: 2px; margin-bottom: 7px; overflow:hidden;
+}
+.ms-qr-timer-bar::after {
+  content: ''; display:block; height:100%;
+  background: var(--lime); border-radius:2px;
+  animation: timerShrink 120s linear forwards;
+}
+@keyframes timerShrink { from { width:100%; } to { width:0; } }
+
+/* Divider */
+.ms-divider {
+  display: flex; align-items: center; gap: 12px;
+  margin: 20px 0; color: var(--muted); font-size: .78rem;
+}
+.ms-divider::before, .ms-divider::after {
+  content:''; flex:1; height:1px; background:var(--border);
+}
+
+/* Phone input */
+.ms-phone-row { display:flex; gap:10px; }
+.ms-input {
+  flex:1; border: 1.5px solid var(--border); border-radius: 100px;
+  padding: 11px 20px; font-family:'DM Sans',sans-serif; font-size:.9rem;
+  background: var(--card); outline:none; color: var(--ink);
+  transition: border-color .2s;
+}
+.ms-input:focus { border-color: var(--teal); }
+.ms-send-btn { padding: 11px 22px; white-space:nowrap; }
+.ms-hint { font-size: .74rem; color: var(--muted); margin-top:10px; font-weight:300; }
+
+/* Signal steps */
+.ms-signal-steps { display:flex; flex-direction:column; gap:14px; margin-bottom:24px; }
+.ms-sig-step { display:flex; align-items:flex-start; gap:14px; }
+.ms-sig-num {
+  width:28px; height:28px; border-radius:50%; flex-shrink:0;
+  background: var(--ink); color:var(--lime);
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Bricolage Grotesque',sans-serif; font-weight:800; font-size:.8rem;
+}
+.ms-sig-text { font-size:.9rem; line-height:1.55; padding-top:4px; font-weight:300; }
+.ms-handle {
+  display:inline-block; background:#e8eeff; color:#1a2e8a;
+  border-radius:6px; padding:1px 8px; font-weight:600; font-size:.85rem;
+}
+.ms-code-inline {
+  display:inline-block; background: var(--ink); color: var(--lime);
+  border-radius:6px; padding:1px 8px; font-family:monospace; font-size:.85rem;
+}
+.ms-deep-link {
+  width:100%; justify-content:center; gap:10px;
+  background: #e8eeff; color:#1a2e8a;
+  border:1.5px solid #c0ceff; border-radius:100px;
+  padding:12px 24px; font-size:.9rem;
+  transition: background .2s, transform .15s;
+}
+.ms-deep-link:hover { background:#d0daff; transform:translateY(-2px); }
+
+/* Username copy box */
+.ms-username-box {
+  background: var(--card); border: 1.5px solid var(--border);
+  border-radius: 14px; padding: 14px 18px;
+}
+.ms-username-label { font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); display:block; margin-bottom:6px; }
+.ms-username-val { display:flex; align-items:center; justify-content:space-between; font-family:'Bricolage Grotesque',sans-serif; font-weight:700; }
+.ms-copy-btn {
+  display:inline-flex; align-items:center; gap:5px;
+  background: rgba(10,12,16,.06); border:none; border-radius:8px;
+  padding:5px 12px; font-size:.76rem; cursor:none; color:var(--muted);
+  transition: background .2s, color .2s;
+}
+.ms-copy-btn:hover { background:var(--lime); color:var(--ink); }
+
+/* Success */
+.ms-success-icon {
+  width:72px; height:72px; border-radius:50%;
+  background: var(--lime); color: var(--ink);
+  display:flex; align-items:center; justify-content:center;
+  font-size:2rem; font-weight:800; margin-bottom:24px;
+  animation: popIn .5s cubic-bezier(.34,1.56,.64,1);
+}
+@keyframes popIn { from{transform:scale(0)} to{transform:scale(1)} }
+</style>
+
+<script>
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top = e.clientY + 'px';
+  });
+  document.querySelectorAll('a, button, .feat-card, .int-chip').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('big'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
+  });
+
+  // Scroll reveal
+  const revealEls = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+    });
+  }, { threshold: 0.12 });
+  revealEls.forEach(el => observer.observe(el));
+
+  // Typing indicator loop
+  const typing = document.querySelector('.typing');
+  let visible = true;
+  setInterval(() => {
+    visible = !visible;
+    typing.style.opacity = visible ? '1' : '0';
+    typing.style.transition = 'opacity .4s';
+  }, 2800);
+
+  // ── Messenger overlay ──
+  function openMessenger(e) {
+    e.preventDefault();
+    showStep('choose');
+    document.getElementById('messenger-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeMessenger() {
+    document.getElementById('messenger-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+    setTimeout(() => showStep('choose'), 400);
+  }
+  function showStep(name) {
+    document.querySelectorAll('.ms-step').forEach(s => s.classList.add('hidden'));
+    document.getElementById('ms-step-' + name).classList.remove('hidden');
+  }
+  function chooseApp(app) {
+    showStep(app);
+    if (app === 'whatsapp') startWATimer();
+  }
+  function backToChoose() { showStep('choose'); }
+
+  // WhatsApp timer countdown
+  function startWATimer() {
+    let sec = 120;
+    const el = document.getElementById('wa-timer');
+    if (!el) return;
+    clearInterval(window._waTimerInterval);
+    window._waTimerInterval = setInterval(() => {
+      sec--;
+      if (sec <= 0) { clearInterval(window._waTimerInterval); el.textContent = 'Expired'; return; }
+      const m = Math.floor(sec/60), s = sec%60;
+      el.textContent = m + ':' + String(s).padStart(2,'0');
+    }, 1000);
+  }
+
+  function sendWALink() {
+    const phone = document.getElementById('wa-phone').value.trim();
+    if (!phone) { document.getElementById('wa-phone').focus(); return; }
+    setTimeout(() => showStep('success'), 400);
+  }
+
+  function openSignalDeepLink() {
+    // In production this would open signal://… deep link
+    setTimeout(() => showStep('success'), 600);
+  }
+
+  function copyHandle(btn) {
+    navigator.clipboard.writeText('@SMOA.mobility').catch(()=>{});
+    btn.innerHTML = '✓ Copied';
+    btn.style.background = 'var(--lime)';
+    btn.style.color = 'var(--ink)';
+    setTimeout(() => {
+      btn.innerHTML = '<svg width="15" height="15" viewBox="0 0 15 15" fill="none"><rect x="5" y="5" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M3 10V3h7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg> Copy';
+      btn.style.background = '';
+      btn.style.color = '';
+    }, 2000);
+  }
+
+  // Close on backdrop click
+  document.getElementById('messenger-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeMessenger();
+  });
+
+  // Register overlay interactive elements for cursor big effect
+  document.querySelectorAll('.ms-app-btn, #messenger-close, .ms-back, .ms-input, .ms-send-btn, .ms-deep-link, .ms-copy-btn, .btn').forEach(el => {
+    el.addEventListener('mouseenter', () => cursor.classList.add('big'));
+    el.addEventListener('mouseleave', () => cursor.classList.remove('big'));
+  });
+</script>
+</body>
+</html>

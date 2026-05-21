@@ -1,0 +1,43 @@
+http:
+  middlewares:
+    strip-api-prefix:
+      stripPrefix:
+        prefixes:
+          - "/api/dashbot"
+          - "/api/graphhopper"
+
+  services:
+    web:
+      loadBalancer:
+        servers:
+          - url: http://web:80
+    dashbot:
+      loadBalancer:
+        servers:
+          - url: http://dashbot:5000
+    dyconet:
+      loadBalancer:
+        servers:
+          - url: http://dyconet:5000
+    graphhopper:
+      loadBalancer:
+        servers:
+          - url: http://graphhopper:8080
+
+  routers:
+    web:
+      rule: PathPrefix("/")
+      service: web
+    dashbot:
+      rule: PathPrefix("/api/dashbot")
+      service: dashbot
+      middlewares:
+        - strip-api-prefix
+    dyconet:
+      rule: PathPrefix("/api/dyconet")
+      service: dyconet
+    graphhopper:
+      rule: PathPrefix("/api/graphhopper")
+      service: graphhopper
+      middlewares:
+        - strip-api-prefix
