@@ -23,6 +23,10 @@ http:
       loadBalancer:
         servers:
           - url: http://graphhopper:8080
+    # routing:
+    #   loadBalancer:
+    #     servers:
+    #       - url: http://routing:5000
 
   routers:
     web:
@@ -41,3 +45,6 @@ http:
       service: graphhopper
       middlewares:
         - strip-api-prefix
+    # routing:
+    #   rule: PathPrefix("/api/route")
+    #   service: routing

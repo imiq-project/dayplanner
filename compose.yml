@@ -72,10 +72,13 @@ services:
     pull_policy: build
     restart: always
     # TODO: only for debugging and presentation purpose, should be removed
-    ports:
-      - 9000:8080
+    # ports:
+    #   - 9000:8080
 
-  routing:
-    build: services/routing
-    pull_policy: build
-    restart: always
+  # routing:
+  #   image:  ghcr.io/mmanjang/simple_engine:latest
+  #   restart: always
+  #   environment:
+  #     - GRAPHHOPPER_URL=http://graphhopper:8080
+  #   depends_on:
+  #     - graphhopper

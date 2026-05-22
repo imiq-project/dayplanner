@@ -4,8 +4,6 @@
 
 ### GraphHopper
 
-UI is exposed at http:/localhost:9080 for debugging purposes.
-
 ```python
 import requests
 
