@@ -1,6 +1,7 @@
 services:
   proxy:
-    build: services/proxy
+    build:
+      context: services/proxy
     pull_policy: build
     restart: always
 
@@ -56,19 +57,22 @@ services:
     - ELEVENLABS_VOICE_ID=$ELEVENLABS_VOICE_ID
 
   web:
-    build: services/web
+    build:
+      context: services/web
     restart: always
     pull_policy: build
     environment:
       - APP_SECRET=$DAILYPLAN_APP_SECRET
 
   dyconet:
-    build: services/dyconet
+    build:
+      context: services/dyconet
     pull_policy: build
     restart: always
 
   graphhopper:
-    build: services/graphhopper
+    build:
+      context: services/graphhopper
     pull_policy: build
     restart: always
     # TODO: only for debugging and presentation purpose, should be removed
@@ -77,7 +81,8 @@ services:
 
   routing:
     restart: always
-    build: services/routing
+    build:
+      context: services/routing
     pull_policy: build
     # image:  ghcr.io/mmanjang/simple_engine:latest
     # environment:
