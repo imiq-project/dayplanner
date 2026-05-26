@@ -1,0 +1,212 @@
+{
+  "cognitive_passport": {
+    "version": "baseline_1.0",
+    "model": "DYCONET Baseline — No Environmental Perturbations",
+    "agent_id": "1",
+    "timestamp": "2026-05-22T08:16:32.349926Z",
+    "topology": {
+      "n_needs": 11,
+      "n_modes": 4,
+      "n_nodes": 19,
+      "mode_names": [
+        "car",
+        "bike",
+        "pt",
+        "walk"
+      ],
+      "need_names": [
+        "pro_env",
+        "physical",
+        "privacy",
+        "autonomy",
+        "cost",
+        "speed",
+        "safety_accident",
+        "safety_crime",
+        "comfort",
+        "reliable",
+        "health_infection"
+      ]
+    },
+    "profile": {
+      "needs": {
+        "pro_env": 0.6667,
+        "physical": 0.5,
+        "privacy": 0.5,
+        "autonomy": 0.5,
+        "cost": 1.0,
+        "speed": 0.8333,
+        "safety_accident": 0.8333,
+        "safety_crime": 0.6667,
+        "comfort": 0.6667,
+        "reliable": 0.8333,
+        "health_infection": 0.3333
+      },
+      "environmental_tolerances": {
+        "rain": 0.5,
+        "crowding": 0.5,
+        "darkness": 0.5,
+        "traffic": 0.5,
+        "temperature": 0.5
+      },
+      "tolerance_note": "Profile metadata only — tolerances do not enter ODE dynamics in Baseline v1.0",
+      "values": {
+        "biospheric": 0.5,
+        "altruistic": 0.5,
+        "egoistic": 0.5,
+        "hedonic": 0.5
+      }
+    },
+    "deliberation": {
+      "final_choice": "CAR",
+      "probabilities": {
+        "car": 0.39764389395713806,
+        "bike": 0.21945138275623322,
+        "pt": 0.010663432069122791,
+        "walk": 0.37224140763282776
+      },
+      "confidence": 0.0066,
+      "reaction_time_seconds": 0.44,
+      "convergence_achieved": true,
+      "decision_difficulty": "CONFLICTED"
+    },
+    "dissonance_triad": {
+      "C_structural": 0.9885,
+      "C_interpretation": "HIGH - Significant structural ambivalence",
+      "D_environmental": 0.0,
+      "D_environmental_note": "Inactive in Baseline v1.0 (no stressor context)",
+      "D_behavioral": 1,
+      "D_behavioral_interpretation": "STRUCTURAL DISSONANCE - Deliberation flipped base preference",
+      "D_behavioral_continuous": 0.0067,
+      "D_behavioral_continuous_interpretation": "STABLE — distribution unchanged by deliberation",
+      "dissonance_type": "structural",
+      "base_preference": "WALK",
+      "final_choice": "CAR",
+      "preference_shifted": true,
+      "shift_explanation": "Agent shifted from WALK to CAR due to structural ambivalence (C_structural=0.989). No environmental stressor active in this baseline run.",
+      "extended_process_diagnostics": {
+        "existing_diagnostics": {
+          "C_structural": 0.9885,
+          "D_behavioral": 1,
+          "D_behavioral_continuous": 0.0067,
+          "base_preference": "WALK",
+          "final_choice": "CAR",
+          "preference_shifted": true,
+          "conflict_trajectory_length": 501,
+          "conflict_peak": 0.9874,
+          "conflict_final": 0.9057,
+          "conflict_drop": 0.0817
+        },
+        "cognitive": {
+          "need_coherence_score": 5.381,
+          "need_coherence_per_mode": {
+            "car": 5.381,
+            "bike": 5.3758,
+            "pt": 2.8189,
+            "walk": 5.5263
+          },
+          "need_conflict_index": 0.1818,
+          "n_needs_supporting_winner": 9,
+          "n_needs_opposing_winner": 2,
+          "commitment_stability": 0.926,
+          "winner_switch_count": 1,
+          "last_switch_step": 37,
+          "belief_polarization_winner": 0.5253
+        },
+        "affective": {
+          "valence_winner_final": 0.6354,
+          "valence_winner_initial": 0.6667,
+          "valence_drift_winner": -0.0313,
+          "affective_polarization": 0.0961,
+          "gate_dominance_ratio_winner": 1.8841,
+          "valence_action_coherence": 0.9998,
+          "valence_per_mode_initial": {
+            "car": 0.6667,
+            "bike": 0.3333,
+            "pt": -0.3333,
+            "walk": 0.6667
+          },
+          "valence_per_mode_final": {
+            "car": 0.6354,
+            "bike": 0.6338,
+            "pt": 0.5422,
+            "walk": 0.6384
+          },
+          "affective_convergence_lead": 0.042
+        },
+        "cognitive_affective": {
+          "need_valence_alignment": 0.9998,
+          "affective_override": false,
+          "affective_override_score": 0.0,
+          "motivational_coherence": 0.9998,
+          "gating_amplification_ratio": -0.2783,
+          "cognitive_affective_dissonance": 0.0013,
+          "dissonance_source": "none",
+          "interpretation": {
+            "need_valence_alignment": "aligned — affect backs belief coherence",
+            "motivational_coherence": "high — needs and emotions point to same mode",
+            "cognitive_affective_dissonance": "LOW (<0.15)"
+          }
+        }
+      }
+    },
+    "routing_parameters": {
+      "mode_weights": {
+        "car": 0.3976,
+        "bike": 0.2195,
+        "pt": 0.0107,
+        "walk": 0.3722
+      },
+      "utility_coefficients": {
+        "eco_bonus": 0.6793,
+        "exercise_bonus": 0.5107,
+        "privacy_bonus": 0.5907,
+        "autonomy_bonus": 0.5821,
+        "cost_penalty": 0.9344,
+        "time_penalty": 0.7836,
+        "safety_accident_bonus": 0.8105,
+        "safety_crime_bonus": 0.6994,
+        "comfort_penalty": 0.6701,
+        "reliability_bonus": 0.8243,
+        "health_infection_penalty": 0.4585
+      },
+      "contextual_flags": {
+        "avoid_unlit_paths": false,
+        "prefer_covered_paths": false,
+        "tolerate_crowding": false,
+        "avoid_traffic": false,
+        "prefer_climate_control": false
+      }
+    },
+    "xai_summary": {
+      "decision_narrative": "Agent chose CAR. driven by reliable, speed, safety_crime needs. despite initial preference for WALK. Structural ambivalence (C_structural=0.99) caused the deliberative shift. The decision involved significant internal value conflict.",
+      "key_drivers": [
+        "reliable",
+        "speed",
+        "safety_crime",
+        "comfort",
+        "safety_accident"
+      ],
+      "key_inhibitors": [
+        "pro_env",
+        "physical"
+      ],
+      "confidence_level": 0.0066
+    },
+    "agent_profile": {
+      "age": 0,
+      "gender": null,
+      "ovgu_affiliation": false,
+      "magdeburg_connection": []
+    },
+    "spatial_context": {
+      "n_pois": 0,
+      "mode_accessibility": {}
+    },
+    "top_needs_ranking": [
+      "cost",
+      "reliable",
+      "speed"
+    ]
+  }
+}

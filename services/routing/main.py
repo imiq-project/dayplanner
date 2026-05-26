@@ -3,10 +3,10 @@ import json
 
 app = Flask(__name__)
 
-with open("example_response_pretty.json") as f:
+with open("routing_output.json") as f:
     dummy_output = json.load(f)
 
-@app.route("/api/dyconet", methods=["POST"])
+@app.route("/api/route", methods=["POST"])
 def route():
     return dummy_output
 

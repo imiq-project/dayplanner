@@ -75,10 +75,12 @@ services:
     # ports:
     #   - 9000:8080
 
-  # routing:
-  #   image:  ghcr.io/mmanjang/simple_engine:latest
-  #   restart: always
-  #   environment:
-  #     - GRAPHHOPPER_URL=http://graphhopper:8080
-  #   depends_on:
-  #     - graphhopper
+  routing:
+    restart: always
+    build: services/routing
+    pull_policy: build
+    # image:  ghcr.io/mmanjang/simple_engine:latest
+    # environment:
+    #   - GRAPHHOPPER_URL=http://graphhopper:8080
+    # depends_on:
+    #   - graphhopper
