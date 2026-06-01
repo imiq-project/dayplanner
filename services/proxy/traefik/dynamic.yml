@@ -5,6 +5,7 @@ http:
         prefixes:
           - "/api/dashbot"
           - "/api/graphhopper"
+          - "/api/routing"
 
   services:
     web:
@@ -26,7 +27,7 @@ http:
     routing:
       loadBalancer:
         servers:
-          - url: http://routing:5000
+          - url: http://routing:8000
 
   routers:
     web:
@@ -46,5 +47,7 @@ http:
       middlewares:
         - strip-api-prefix
     routing:
-      rule: PathPrefix("/api/route")
+      rule: PathPrefix("/api/routing")
       service: routing
+      middlewares:
+        - strip-api-prefix

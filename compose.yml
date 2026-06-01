@@ -81,11 +81,8 @@ services:
 
   routing:
     restart: always
-    build:
-      context: services/routing
-    pull_policy: build
-    # image:  ghcr.io/mmanjang/simple_engine:latest
-    # environment:
-    #   - GRAPHHOPPER_URL=http://graphhopper:8080
-    # depends_on:
-    #   - graphhopper
+    image: ghcr.io/imiq-project/routing:latest
+    environment:
+      - GRAPHOPPER_HOST=http://graphhopper:8080
+    depends_on:
+      - graphhopper
