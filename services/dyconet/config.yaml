@@ -1,0 +1,328 @@
+# =============================================================================
+# PARSER CONFIGURATION: LimeSurvey JSON → DeepHOTCO v4
+# =============================================================================
+# Version: 4.1.0 (Real Data Integration)
+# Date: 2026-02-12
+# Author: Gonzalo + Claude
+
+parser_version: "4.1.0"
+
+# =============================================================================
+# MODE AGGREGATION
+# =============================================================================
+modes:
+  # Strategy: conditional based on EV prevalence
+  # Will be determined at runtime by check_ev_prevalence()
+  strategy: "conditional"  # auto-detect 4 vs 5 modes
+  
+  ev_threshold:
+    min_users: 30          # Minimum N for car_green mode
+    min_percentage: 0.10   # 10% of sample
+  
+  aggregation_rules:
+    car:
+      survey_modes: ["car", "pass", "taxi"]  # s1_car, s1_pass, s1_taxi
+      aggregation: "max"  # Use max frequency
+    
+    car_green:
+      survey_modes: ["bev", "phev"]  # s1_bev, s1_phev (NOT hybrid - spelling)
+      aggregation: "max"
+      conditional: true  # Only if threshold met
+    
+    bike:
+      survey_modes: ["bike", "bikeshare"]
+      aggregation: "max"
+    
+    pt:
+      survey_modes: ["pt", "train"]
+      aggregation: "mean"  # Average bus + train
+    
+    walk:
+      survey_modes: ["walk"]
+      aggregation: "identity"
+
+# =============================================================================
+# FREQUENCY AGGREGATION (S1 + S2)
+# =============================================================================
+frequencies:
+  # S1 and S2 measure same construct (usage in last 3 months)
+  aggregation: "mean"  # (S1 + S2) / 2
+  
+  # Alternative strategies (for sensitivity analysis)
+  alternatives:
+    max: false       # max(S1, S2)
+    weighted: false  # 0.6*S1 + 0.4*S2
+  
+  # Compute ICC for validation
+  compute_icc: true
+  
+  # Scale: 1-5 (Never, Rarely, Sometimes, Often, Always)
+  scale_min: 1
+  scale_max: 5
+
+# =============================================================================
+# NEEDS CONFIGURATION
+# =============================================================================
+needs:
+  # Total: 11 needs (removed hedonism, added 4 new)
+  n_needs: 11
+  
+  mapping:
+    need_pro_env: "env"
+    need_physical: "health_activity"
+    need_privacy: "crowding"  # INVERSE: high crowding = low privacy
+    need_autonomy: "flex"
+    need_cost: "cost"
+    need_speed: "time"
+    need_safety_accident: "safety_accident"  # NEW: specific
+    need_safety_crime: "safety_crime"        # NEW: specific
+    need_comfort: "comfort_physical"
+    need_reliable: "reliable"                # NEW
+    need_health_infection: "health_infection" # NEW: post-COVID
+  
+  # Inverse coding
+  inverse:
+    need_privacy: true  # crowding rating is inverse of privacy need
+  
+  # Scale: 1-7 (Not important → Extremely important)
+  scale_min: 1
+  scale_max: 7
+  
+  # Attention check
+  attention_check:
+    variable: "attn_check"
+    expected_value: 7
+    action: "exclude"  # Exclude respondent if failed
+
+# =============================================================================
+# BELIEFS CONFIGURATION
+# =============================================================================
+beliefs:
+  # Strategy: Survey provides top 3 needs only, impute rest
+  imputation_strategy: "empirical_3layer"  # EMPIRICAL_POP_MEANS + per-agent adj + constraints
+
+  # Belief representation used when building W matrices.
+  # Proof-of-concept default: keep raw personalized beliefs so the topology
+  # reflects the agent's own belief profile directly.
+  # Set to true only for explicit ablation / competition diagnostics.
+  center_beliefs: false
+  
+  # Survey beliefs: per-mode ratings for top 3 ranked needs
+  # Shape: [n_modes, 3] → impute to [n_modes, 11]
+  partial_source: "ranking"  # Use ranking needs
+  
+  # Scale: 1-7 (Strongly disagree → Strongly agree)
+  # Transform to: [-1, +1] via (x - 4) / 3
+  scale_min: 1
+  scale_max: 7
+  scale_center: 4
+  
+  # Sensitivity analysis
+  sensitivity:
+    enabled: true
+    perturbation: 0.30  # ±30% of imputed values
+
+# =============================================================================
+# VALENCES CONFIGURATION
+# =============================================================================
+valences:
+  # Scale: -3 to +3 (Very negative → Very positive)
+  scale_min: -3
+  scale_max: 3
+  
+  # Missing data handling
+  missing:
+    NA:  # No experience with mode
+      strategy: "neutral"  # Start at 0.5
+      # Alternative: "belief_derived" → 0.5 + 0.3 * beliefs.mean()
+    
+    null:  # Skipped question
+      strategy: "neutral"  # 0.5
+  
+  # Aggregation to modes
+  aggregation:
+    car: "max"  # max(car_driver, car_passenger)
+    car_green: "max"  # max(electric_car, hybrid/phev if exists)
+    bike: "max"  # max(bike, bikesharing)
+    pt: "mean"  # mean(bus, train)
+    walk: "identity"
+
+# =============================================================================
+# STRESSORS & TOLERANCES
+# =============================================================================
+stressors:
+  n_stressors: 5
+  names: ["rain", "crowding", "darkness", "traffic", "temperature"]
+  
+  # Tolerance computation (psychological resistance)
+  tolerances:
+    rain:
+      variables: ["RA1", "RA2", "RA3"]
+      formula: "((8 - RA1) + (8 - RA2) + RA3) / 21"
+      scale: [1, 7]
+    
+    crowding:
+      variables: ["CA1", "CA2", "CA3"]
+      formula: "((8 - CA1) + (8 - CA2) + (8 - CA3)) / 21"
+      scale: [1, 7]
+    
+    darkness:
+      variables: ["DA1", "DA2", "DA3"]
+      formula: "((8 - DA1) + (8 - DA2) + (8 - DA3)) / 21"
+      scale: [1, 7]
+    
+    traffic:
+      variables: ["TA1", "TA2"]
+      formula: "((8 - TA1) + (8 - TA2)) / 14"
+      scale: [1, 7]
+    
+    temperature:
+      variables: ["TEA1", "TEA2", "TEA3"]
+      formula: "((8 - TEA1) + (8 - TEA2) + (8 - TEA3)) / 21"
+      scale: [1, 7]
+  
+  # Stressor computation (environmental pressure)
+  # NOTE: For now, set to 0 (use default scenario values)
+  # Future: derive from contextual variables (CB1, DW1, etc.)
+  stressor_values:
+    default: 0.0  # Neutral scenario
+    # Can be overridden per scenario in training
+
+# =============================================================================
+# VALUES (Schwartz)
+# =============================================================================
+values:
+  n_dimensions: 4
+  
+  aggregation:
+    biospheric: ["bio_pollution", "bio_protect", "bio_respect", "bio_harmony"]
+    altruistic: ["alt_equality", "alt_care", "alt_justice", "alt_peace"]
+    egoistic: ["ego_wealth", "ego_success", "ego_status", "ego_influence"]
+    hedonic: ["hed_enjoy", "hed_fun", "hed_thrill", "hed_pleasure"]
+  
+  # Scale: 1-7 (Not like me → Very much like me)
+  scale_min: 1
+  scale_max: 7
+  
+  # Validation: Cronbach's alpha
+  cronbach_alpha:
+    enabled: true
+    threshold: 0.70  # Minimum acceptable reliability
+  
+  # Use for clustering
+  clustering:
+    enabled: true
+    method: "kmeans"
+    n_clusters: 4  # Typical value profiles
+
+# =============================================================================
+# METADATA (Demographics + POI)
+# =============================================================================
+metadata:
+  demographics:
+    include:
+      - age
+      - gender
+      - education
+      - income
+      - ovgu_active
+      - ovgu_faculty
+      - ovgu_campus_time
+    
+    encoding:
+      gender:
+        male: 0
+        female: 1
+        diverse: 2
+      
+      education:
+        none: 0
+        high_school_diploma: 1
+        university_degree: 2
+        # Add more if needed
+      
+      income:
+        under_1000: 0
+        "1000_2000": 1
+        "2000_3000": 2
+        "3000_4000": 3
+        "4000_5000": 4
+        over_5000: 5
+      
+      ovgu_campus_time:
+        never: 0
+        sometimes: 1
+        often: 2
+        daily: 3
+  
+  poi:
+    include: true
+    parse_geospatial: true
+    compute_accessibility: false  # For future v5
+
+# =============================================================================
+# DATA QUALITY & VALIDATION
+# =============================================================================
+validation:
+  # Minimum completion rate
+  min_completion: 0.80  # 80% of survey
+  
+  # Exclude if missing critical sections
+  required_sections:
+    - MOBIL
+    - APP
+    - emoval
+    - values
+  
+  # Outlier detection
+  outliers:
+    method: "iqr"  # Interquartile range
+    threshold: 3.0  # 3 * IQR
+    action: "flag"  # Don't exclude, just flag
+  
+  # Consistency checks
+  consistency:
+    # High valence should correlate with high frequency
+    valence_frequency_min_corr: 0.20
+    
+    # Pro-env values should correlate with env need
+    values_needs_min_corr: 0.30
+
+# =============================================================================
+# OUTPUT FORMAT
+# =============================================================================
+output:
+  # Return format
+  format: "dict"  # or "dataframe", "tensors"
+  
+  # Device
+  device: "cpu"  # Will be set at runtime
+  
+  # Normalization
+  normalize:
+    needs: true       # [1,7] → [0,1]
+    beliefs: true     # [1,7] → [-1,+1]
+    valences: true    # [-3,+3] → [0,1]
+    tolerances: true  # [1,7] → [0,1]
+    values: true      # [1,7] → [0,1]
+    frequencies: true # [1,5] → [0,1]
+
+# =============================================================================
+# LOGGING
+# =============================================================================
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  log_file: "parser.log"
+  
+  report:
+    enabled: true
+    output_file: "parsing_report.json"
+    include:
+      - n_total_responses
+      - n_excluded
+      - n_parsed
+      - exclusion_reasons
+      - missing_data_summary
+      - icc_results
+      - mode_prevalence
+      - cronbach_alpha

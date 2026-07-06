@@ -1,0 +1,6 @@
+flask
+numpy
+scipy
+PyYAML
+torch
+gunicorn
