@@ -1,0 +1,9 @@
+{
+  "id": 1,
+  "PROFILE": "{\"answers\":{}}",
+  "MOBIL": "{\"s1_walk\":3,\"s1_bike\":2,\"s1_pt\":4,\"s1_train\":1,\"s1_car\":4,\"s1_pass\":1,\"s1_ev\":1,\"s1_phev\":1,\"s1_taxi\":1,\"s1_bikeshare\":1,\"s1_scooter\":1,\"s1_moto\":1,\"s2_walk\":3,\"s2_bike\":2,\"s2_pt\":4,\"s2_train\":1,\"s2_car\":4,\"s2_pass\":1,\"s2_ev\":1,\"s2_phev\":1,\"s2_taxi\":1,\"s2_bikeshare\":1,\"s2_scooter\":1,\"s2_moto\":1}",
+  "APP": "{\"answers\":{\"ratings\":{\"comfort_physical\":5,\"reliable\":6,\"flex\":4,\"cost\":7,\"safety_crime\":5,\"health_activity\":4,\"time\":6,\"health_infection\":3,\"crowding\":4,\"safety_accident\":6,\"env\":5,\"attn_check\":7},\"ranking\":[\"cost\",\"reliable\",\"time\"],\"beliefs\":{},\"skippedModes\":[\"hybrid\",\"bikeshare\",\"scooter\",\"car_pass\",\"ev\",\"moto\",\"share\",\"taxi\",\"train\"]}}",
+  "emoval": "{\"answers\":{\"walk\":2,\"bike\":1,\"bus\":-1,\"train\":\"NA\",\"car_driver\":2,\"car_passenger\":0,\"electric_car\":\"NA\",\"carsharing\":0,\"bikesharing\":1,\"escooter\":-1,\"motorcycle\":\"NA\"}}",
+  "values": "{}",
+  "POI": "[]"
+}
